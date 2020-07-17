@@ -20,4 +20,4 @@ ADD entrypoint.sh /usr/sbin/entrypoint.sh
 #change user
 
 # entrypoint.sh
-ENTRYPOINT [ "cfn-guard" ]
+ENTRYPOINT [ "/usr/sbin/entrypoint.sh" ]
