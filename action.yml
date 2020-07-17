@@ -1,0 +1,24 @@
+# action.yml
+name: 'Cloudformation Guard'
+description: 'GitHub action to test your cloudformation templates'
+branding:
+  icon: 'shield'
+  color: 'blue'
+inputs:
+  path:
+    description: 'Cloudformation template to run cfn-guard on'
+    required: false
+    default: '.'
+  rule:
+    description: 'rules file'
+    required: false
+    default: '.'
+outputs:
+  output:
+    description: 'Test Output'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.path }}
+    - ${{ inputs.rule }}
