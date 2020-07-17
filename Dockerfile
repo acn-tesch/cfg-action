@@ -15,9 +15,9 @@ RUN apt-get update && apt-get install -y build-essential
 # move bin to folder in the path
 ADD ./bin/cfn-guard /usr/bin/cfn-guard
 ADD ./bin/cfn-guard-rulegen /usr/bin/cfn-guard-rulegen
-ADD entrypoint.sh /usr/sbin/entrypoint.sh
+ADD entrypoint.sh /entrypoint.sh
 
 #change user
 
 # entrypoint.sh
-ENTRYPOINT [ "/usr/sbin/entrypoint.sh" ]
+ENTRYPOINT [ "/entrypoint.sh" ]
