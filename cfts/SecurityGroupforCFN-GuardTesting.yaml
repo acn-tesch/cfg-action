@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: '2010-09-09'
+#This script launches a secure hardened linux EC2 instance. CFT needs to be updated/modified based on client requirements.
+#Author: Mustakim Dalal - mustakim.dalal@accenture.com
+
+Description: 'TEST CFT - to validate security rules'
+
+Parameters:
+  SecurityGroupName:
+    Type: String
+    AllowedPattern: ^[a-zA-Z0-9\-]*$
+  SecurityGroupDescription:
+    Type: String
+    AllowedPattern: ^[a-zA-Z0-9\s\,\.\-\_\:\/\(\)\#\@\[\]\+\=\&\;\{\}\!\$\*]{1,255}$
+  VpcID:
+    Type: String
+    AllowedPattern: ^vpc-[a-zA-Z0-9\-]*$
+Resources:
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: Sample-SG-for-WEB-Tier
+      GroupDescription: !Ref SecurityGroupDescription
+      VpcId: !Ref VpcID
+  DefaultEgressRule:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      CidrIp: 127.0.0.1/32
+      FromPort: -1
+      IpProtocol: -1
+      ToPort: -1
+      GroupId:
+        Fn::GetAtt:
+          - SecurityGroup
+          - GroupId
+  IngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      CidrIp: 127.0.0.1/32
+      FromPort: 22
+      IpProtocol: "tcp"
+      Description: "SS rule"
+      ToPort: 22
+      GroupId:
+        Fn::GetAtt:
+          - SecurityGroup
+          - GroupId
+  IngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      CidrIp: 127.0.0.1/32
+      FromPort: ANY
+      IpProtocol: "tcp"
+      Description: "Telnet rule"
+      ToPort: 23
+      GroupId:
+        Fn::GetAtt:
+          - SecurityGroup
+          - GroupId
+  IngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      CidrIp: 127.0.0.1/32
+      FromPort: ANY
+      IpProtocol: "tcp"
+      Description: "SMTP rule"
+      ToPort: 25
+      GroupId:
+        Fn::GetAtt:
+          - SecurityGroup
+          - GroupId

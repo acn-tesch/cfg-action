@@ -1,0 +1,29 @@
+Resources:
+  Takedaelbcrossregion:
+    Type: AWS::ElasticLoadBalancing::LoadBalancer
+    Properties:
+      Scheme: internal
+      SecurityGroups:
+        - sg-id
+      Subnets:
+        - subnet-id
+      Instances:
+        - instance-id
+      AvailabilityZones:
+        - !Ref AWS::Region
+      CrossZone: '1'
+      Tags:
+        - Key: 
+          Value: 
+      Listeners:
+        - LoadBalancerPort: '443'
+          InstancePort: '443'
+          Protocol: HTTPS
+          InstanceProtocol: HTTPS
+          SSLCertificateId: 
+      HealthCheck:
+        Target: TCP:port or HTTPS|HTTP:port/PathToPing
+        HealthyThreshold: 
+        Interval: 
+        Timeout: 
+        UnhealthyThreshold: 
