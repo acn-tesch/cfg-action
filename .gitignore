@@ -1,3 +1,5 @@
 # compiled binaries. 
 
+cfts.ignore/*
 reports/*
+consolidated_report.txt
