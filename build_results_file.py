@@ -7,14 +7,14 @@ import os
 import json
 import ast
 
-basedir = '/tmp/cfn_guard_temp/'
+reportsdir = os.environ.get('PWD')+'/reports/'
 cfnnag_l = list()
 
 
 if __name__ == "__main__":
     try:
-        for filename in os.listdir(basedir):
-            f = open(basedir + filename, "r")
+        for filename in os.listdir(reportsdir):
+            f = open(reportsdir + filename, "r")
             text = f.read()
             f.close()
             cfnnag_d = json.loads(text)[0]
