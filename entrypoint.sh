@@ -19,7 +19,7 @@ for x in $(cat /tmp/cfn_templates); do
     echo "Scanning file - ${x}"
     echo "Scanning file - ${x}" > ${PWD}/reports/results${count}.txt
     echo "Scanning datetime - "$(date +%Y%m%d_%H%M%S)  >> ${PWD}/reports/results${count}.txt
-    cfn-guard -t ${x} -r /rules/cfn-guard-sg-rule-testing.ruleset >> ${PWD}/reports/results${count}.txt
+    cfn-guard -vt ${x} -r /rules/cfn-guard-sg-rule-testing.ruleset >> ${PWD}/reports/results${count}.txt
     #cat ${PWD}/reports/results${count}.txt
     count=`expr $count + 1`
 done
