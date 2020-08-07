@@ -24,7 +24,7 @@ Resources:
   DefaultEgressRule:
     Type: AWS::EC2::SecurityGroupEgress
     Properties:
-      CidrIp: 127.0.0.1/32
+      CidrIp: 192.168.0.1/24
       FromPort: -1
       IpProtocol: -1
       ToPort: -1
@@ -32,37 +32,37 @@ Resources:
         Fn::GetAtt:
           - SecurityGroup
           - GroupId
-  IngressRule:
+  SSHIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
-      CidrIp: 127.0.0.1/32
-      FromPort: 22
+      CidrIp: 192.168.1.1/24
+      FromPort: ANY
       IpProtocol: "tcp"
-      Description: "SS rule"
+      Description: "SSH rule"
       ToPort: 22
       GroupId:
         Fn::GetAtt:
           - SecurityGroup
           - GroupId
-  IngressRule:
+  TelnetIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
-      CidrIp: 127.0.0.1/32
+      CidrIp: 192.168.2.1/24
       FromPort: ANY
       IpProtocol: "tcp"
-      Description: "Telnet rule"
+      Description: "Telnet rule - Will generate a Failure"
       ToPort: 23
       GroupId:
         Fn::GetAtt:
           - SecurityGroup
           - GroupId
-  IngressRule:
+  SMTPIngressRule:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
-      CidrIp: 127.0.0.1/32
+      CidrIp: 0.0.0.0/0
       FromPort: ANY
       IpProtocol: "tcp"
-      Description: "SMTP rule"
+      Description: "SMTP rule - Will Generate a Failure"
       ToPort: 25
       GroupId:
         Fn::GetAtt:

@@ -1,18 +1,28 @@
 
 
-AWS::EC2::SecurityGroup SecurityGroupIngress == [{"":"SSHLocation","FromPort":22,"IpProtocol":"tcp","ToPort":22}]
+## Check if the CidrIP is from a trusted range
 
-AWS::EC2::SecurityGroupIngress  == [{"FromPort":21,"IpProtocol":"tcp","ToPort":21}]
+# CidrIP Restricted
+AWS::EC2::SecurityGroupIngress CidrIp != 0.0.0.0/0 <<  INGRESS from ANYWHERE is NOT ALLOWED
+# |OR| AWS:EC2::SecurityGroupIngress CidrIp != 0.0.0.0/0
+# CidrIP Allowed
+AWS::EC2::SecurityGroupIngress CidrIp == "127.0.0.1/32"
+#AWS:EC2::SecurityGroupIngress CidrIp IN %permitted_cidrip%
 
-AWS::EC2::SecurityGroupIngress SecurityGroupIngress == [{FromPort":22,"IpProtocol":"tcp","ToPort":22}]
+AWS::EC2::SecurityGroupEgress CidrIP != %restricted_ip_list%
 
-AWS::EC2::SecurityGroupIngress ToPort IN %permitted_inbound_ports%
+## Check Ports
 
-AWS::EC2::SecurityGroupIngress ToPort IN ["ToPort":{22,80,8080,443,8443}]
+# FromPort Allowed Values
+AWS::EC2::SecurityGroupIngress FromPort == ANY
 
+# ToPorts Allowed
+AWS::EC2::SecurityGroupIngress ToPort IN %permitted_inbound_ports% << This has NOT been pre-approved for use
+# Ports Restricted
+AWS::EC2::SecurityGroupIngress ToPort NOT_IN %restricted_inbound_ports% << You are using a RESTRICTED PORT!!!!
 
-
-
-#Working Combos
+# Variables to define an array of restricted or permitted values
+let restricted_inbound_ports = [23,25,3389]
 let permitted_inbound_ports = [22,80,8080,443,8443]
-AWS::EC2::SecurityGroupIngress ToPort IN %permitted_inbound_ports%
+let permitted_cidrip = ["127.0.1.1/24","127.0.2.1/24",127.0.3.1/24"]
+let restricted_ip_list = []
