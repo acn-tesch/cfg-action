@@ -1,0 +1,404 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: CloudFormation template to create a new RHEL v7 EC2 Instance with security features.
+#Author: Mustakim Dalal - mustakim.dalal@accenture.com
+
+
+############################################ GROUPING OF PARAMETERS - ADDS GROUP LABELS FOR PARAMETERS ############################################
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+
+ #Linux Instance Parameters#
+      - Label:
+          default: Linux Instance Configurations
+        Parameters:
+          - Company 
+          - Team
+          - LinuxInstanceType
+          - LinuxAMI
+          - EBSVolumeType
+          - EBSVolumeSize
+          - PendingWindowInDays
+
+    #Network Parameters#
+      - Label:
+          default: Instance Network Configuration
+        Parameters:
+          - VPC
+          - LinuxSubnet
+          - AvailabilityZone
+
+    #Linux Security Group Parameters#      
+      - Label:
+          default: Instance Security Group Configurations
+        Parameters: 
+          - SecurityGroupName
+          - SecurityGroupDescription
+          - SecurityGroupIngressDescription
+          - SecurityGroupIngressCidrIp
+          - SecurityGroupIngressFromPort
+          - SecurityGroupIngressToPort
+          - SecurityGroupIngressIpProtocol
+          - SecurityGroupEgressDescription
+          - SecurityGroupEgressCidrIp
+          - SecurityGroupEgressFromPort
+          - SecurityGroupEgressToPort
+          - SecurityGroupEgressIpProtocol
+          
+
+    #Linux Security Parameters#      
+      - Label:
+          default: Other Key Security Configurations
+        Parameters:           
+          - DisableApiTermination
+          - DeleteOnTermination
+            
+          
+
+############################################ PARAMETERS FOR LINUX EC2 CREATION ############################################
+
+Parameters:
+
+#VPC SELECTION
+  VPC:
+    Type: 'AWS::EC2::VPC::Id'
+    Description: Select the VPC where the EC2 instances will be created
+    
+
+#SUBNET SELECTION
+  LinuxSubnet:
+    Type: 'AWS::EC2::Subnet::Id'
+    Description: Select subnet for Linux Instance
+    
+
+#AVAILABILITY ZONE SELECTION
+  AvailabilityZone:
+    Type: AWS::EC2::AvailabilityZone::Name 
+    Description: Please select the availability zone you want the instance to be created in.     
+
+  
+#INSTANCE TYPE/SIZE SELECTION
+  LinuxInstanceType:
+    Default: t3.small 
+    AllowedValues: #Update allowed values based on requirements
+      - t3.nano
+      - t3.micro
+      - t3.small
+      - t3.medium
+      - t3.large
+      - t2.nano
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t2.large
+      - m3.2xlarge
+      - m4.large
+      - m4.xlarge
+      - m4.2xlarge 
+    Description: Amazon EC2 Linux Instance Type
+    Type: String
+  
+#INSTANCE AMID OR GOLDEN IMAGE
+  LinuxAMI:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: /aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2
+
+#API TERMINATION CHECK
+  DisableApiTermination:
+    Type: String
+    Description: Prevent APIs, including CloudFormation, from being able to delete EC2 instances
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Default: 'false'
+
+#EBS VOLUME DELETION UPON EC2 DELETION 
+  DeleteOnTermination:
+    Type: String
+    Description: Should EBS volumes be deleted upon instance termination?
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Default: 'true'
+
+#KMS KEY ROTATION SELECTION
+  PendingWindowInDays:
+    Description: Please specify number of days before AWS automatically rotates KMS key.
+    Default: 7 
+    AllowedValues: #number of days
+      - "7"
+      - "14"
+      - "30"
+    Type: Number      
+
+  
+
+
+#SECURITY GROUP NAME & DESCRIPTION SELECTION
+
+  SecurityGroupName:
+      Description: Name for the security group.
+      MaxLength: 255
+      Type: String 
+      ConstraintDescription: must contain only alphanumberic characters   
+
+
+  SecurityGroupDescription:
+      Description: Informational description for the security group.
+      MaxLength: 255
+      Type: String
+      ConstraintDescription: must contain only alphanumberic characters
+
+###########SECURITY GROUP INGRESS PARAMETERS
+
+#CIDR BLOCK SELECTION
+  SecurityGroupIngressCidrIp:
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Default: 10.0.0.0/16
+    Description: VPC CIDR Block (eg 10.0.0.0/16)
+    Type: String
+  
+#SEC RULE DESCRIPTION
+  SecurityGroupIngressDescription:
+    AllowedPattern: ^[a-zA-Z0-9]*$
+    Description: Please provide the INBOUND rule description.
+    MaxLength: 255
+    Type: String  
+
+#FROM port number
+  SecurityGroupIngressFromPort:
+    Description: Please specify the start of the port range.
+    Type: Number
+
+#TO port number
+  SecurityGroupIngressToPort:   
+    Description: Please specify the end of the port range.
+    Type: Number  
+
+#IP protocol selection
+  SecurityGroupIngressIpProtocol:
+    Type: String
+    Description: Please enter the IP protocal name.
+    AllowedValues:
+      - 'tcp'
+      - 'udp'
+      - 'icmp'
+      - 'icmpv6'
+    Default: 'tcp'
+
+#Instance Owner
+  Company:
+    Description: Company that owns the EC2 resource.
+    Type: String
+
+ #Instance group team 
+  Team:
+    Description: A name of the team creating the instance.
+    Type: String 
+
+###########SECURITY GROUP EGRESS PARAMETERS
+
+#CIDR BLOCK SELECTION
+  SecurityGroupEgressCidrIp:
+    AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
+    Default: 10.0.0.0/16
+    Description: VPC CIDR Block (eg 10.0.0.0/16)
+    Type: String
+
+
+
+#RULE DESCRIPTION
+  SecurityGroupEgressDescription:
+    AllowedPattern: ^[a-zA-Z0-9]*$
+    Description: Please provide the OUTBOUND rule description.
+    MaxLength: 255
+    Type: String  
+
+#FROM port number
+  SecurityGroupEgressFromPort:
+    Description: Please specify the start of the port range.
+    Type: Number
+
+#TO port number
+  SecurityGroupEgressToPort:
+    Description: Please specify the end of the port range.
+    Type: Number
+
+#IP protocol selection
+  SecurityGroupEgressIpProtocol:
+    Type: String
+    Description: Please enter the IP protocal name.
+    AllowedValues:
+      - 'tcp'
+      - 'udp'
+      - 'icmp'
+      - 'icmpv6'
+    Default: 'tcp'
+
+
+#EBS VOLUME TYPE
+
+  EBSVolumeType:
+      Type: String
+      Description: What type of storage should be provisioned for the Instance?
+      AllowedValues:
+        - 'gp2'
+        - 'io1'
+        - 'sc1'
+        - 'sc2'
+      Default: 'gp2'
+
+#EBS VOLUME SIZE
+
+  EBSVolumeSize:
+      Type: String
+      Description: How many GB do you want to allocate to the Instance?
+      Default: 20
+      
+
+
+
+
+############################################ RESOURCE CREATION ############################################
+
+
+Resources:         
+
+##SECURE LINUX EC2 CREATION##
+
+  LinuxEC2:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      Monitoring: True #ALLOWS MONITORING OF EC2 INSTANCE
+      IamInstanceProfile: !Ref InstanceProfile
+      ImageId: !Ref LinuxAMI
+      InstanceType: !Ref LinuxInstanceType
+      NetworkInterfaces:
+          - GroupSet:
+              - !Ref LinuxSecurityGroup
+            DeviceIndex: '0'
+            DeleteOnTermination: true #DELETES NETWORK INTERFACE WHEN EC2 INSTANCE IS DELETED
+            SubnetId: !Ref LinuxSubnet
+      AvailabilityZone: !Ref AvailabilityZone
+      UserData: 
+        Fn::Base64: !Sub |
+          #!bin/bash
+          yum update -y
+
+
+
+
+      # BlockDeviceMappings:
+      #     - DeviceName: /dev/xvdh
+      #       Ebs:
+      #         VolumeType: !Ref EBSVolumeType
+      #         VolumeSize: !Ref EBSVolumeSize
+      #         DeleteOnTermination: !Ref DeleteOnTermination   
+      #         Encrypted: True #STANDED AES 256 ENCRYPTION ENABLED
+      #         KmsKeyId: !Ref InstanceKMS #AWS KMS ENCRYPTION ENABLED WITH AUTO KEY ROTATION
+
+##Secure EBS volume creation
+  EC2Volume: #create new encrypted volume to attach EC2 Instance
+    Type: AWS::EC2::Volume
+    Properties:
+      VolumeType: !Ref EBSVolumeType
+      AvailabilityZone: !GetAtt LinuxEC2.AvailabilityZone
+      Encrypted: true #Standard AES-256 encryption enabled
+      KmsKeyId: !Ref InstanceKMS #Encryption with AWS KMS enabled
+      Size: !Ref EBSVolumeSize
+    
+
+  ##Attach EBS volume to EC2 instance
+  AttachVolume: #Attaches volume to newly created instance
+    Type: AWS::EC2::VolumeAttachment
+    Properties:
+      InstanceId: !Ref LinuxEC2
+      VolumeId: !Ref EC2Volume
+      Device: /dev/xvdh
+
+##KMS KEY CREATION WITH AUTOMATIC ROTATION FOR EBS VOLUME##
+
+  InstanceKMS:
+      Type: AWS::KMS::Key 
+      Properties:
+        KeyPolicy:
+          Version: '2012-10-17'
+          Id: EBS-Key
+          Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: kms:*
+            Resource: '*'
+        PendingWindowInDays: !Ref PendingWindowInDays
+           
+            
+
+##LINUX SECURITY GROUP CREATION##
+  LinuxSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties: 
+        GroupDescription: !Ref SecurityGroupDescription
+        GroupName: !Ref SecurityGroupName
+        SecurityGroupIngress: 
+          - IpProtocol: !Ref SecurityGroupIngressIpProtocol
+            FromPort: !Ref SecurityGroupIngressFromPort
+            ToPort: !Ref SecurityGroupIngressToPort
+            CidrIp: !Ref SecurityGroupIngressCidrIp
+          - IpProtocol: tcp
+            FromPort: 443
+            ToPort: 443
+            CidrIp: '0.0.0.0/0'
+        SecurityGroupEgress: 
+          - IpProtocol: !Ref SecurityGroupEgressIpProtocol
+            FromPort: !Ref SecurityGroupEgressFromPort
+            ToPort: !Ref SecurityGroupEgressToPort
+            CidrIp: !Ref SecurityGroupEgressCidrIp
+          - IpProtocol: tcp
+            FromPort: 443
+            ToPort: 443
+            CidrIp: '0.0.0.0/0'
+        VpcId: !Ref VPC
+
+
+##SSM ROLE CREATION FOR EC2 ACCESS THROUGH SSM -- SECURITY BEST PRACTICE##
+
+  SSMRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore'
+        - 'arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM'
+      Policies: []
+      RoleName: Ec2RoleForSSM
+      Description: EC2 IAM role for SSM access
+              
+
+##IAM INSTANCE PROFILE CREATION -- REFERENCES SSM ROLE -- FOR EC2 TO BE ACCESSED THROUGH SSM##
+
+  InstanceProfile:
+       Type: 'AWS::IAM::InstanceProfile'
+       Properties:
+        InstanceProfileName: Ec2RoleForSSM
+        Roles:
+          - !Ref SSMRole    
+
+
+
+
+############################################ OUTPUTS ############################################
+
+
+# Outputs:
+
