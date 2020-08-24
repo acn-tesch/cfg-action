@@ -8,7 +8,7 @@ GitHub Repository:  https://github.com/aws-cloudformation/cloudformation-guard
 
 ## Cloudformation-Guard Version
 
-[version 0.5.2-beta](https://github.com/aws-cloudformation/cloudformation-guard/releases/tag/v0.5.2-beta)
+[version 0.6.0-beta](https://github.com/aws-cloudformation/cloudformation-guard/releases/tag/v0.6.0-beta)
 
 ## Inputs
 
