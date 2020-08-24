@@ -1,0 +1,33 @@
+## Check if the CidrIP is from a trusted range
+
+## Security best Practice:  Do not allow ingress from ANY OR 0.0.0.0/0 IP
+# Use of Restricted CidrIp
+AWS::EC2::SecurityGroupIngress CidrIp != 0.0.0.0/0 <<  INGRESS from ANYWHERE is NOT ALLOWED
+
+## Best Practice : Use a defined set of CidrIP ranges to ensure only approved networks are allowed Ingress.
+let permitted_cidrip = ["127.0.1.1/24","127.0.2.1/24",127.0.3.1/24"]
+let restricted_ip_list = []
+# CidrIP Allowed
+AWS::EC2::SecurityGroupIngress CidrIp == "127.0.0.1/32"
+#AWS:EC2::SecurityGroupIngress CidrIp IN %permitted_cidrip%
+
+AWS::EC2::SecurityGroupEgress CidrIP != %restricted_ip_list%
+
+## Check Ports
+
+## Best Practice - Ensure SG Egress rules are restricting the use of outbound traffic
+let restricted_outbound_ports = [23,25,3389]
+let permitted_outbound_ports = [22,80,8080,443,8443]
+# FromPort Allowed Values
+AWS::EC2::SecurityGroupEgress FromPort IN %permitted_outbound_ports% << You may only use APPROVED ports
+AWS::EC2::SecurityGroupEgress FromPort IN %restricted_outbound_ports% << You are using a RESTRICTED PORT!!!!
+
+
+## Best Practice:  Only allow approved Ports  This can be done using an Approve or Deny list.
+let restricted_inbound_ports = [23,25,3389]
+let permitted_inbound_ports = [22,80,8080,443,8443]
+
+# ToPorts Allowed
+AWS::EC2::SecurityGroupIngress ToPort IN %permitted_inbound_ports% << This has NOT been pre-approved for use
+# Ports Restricted
+AWS::EC2::SecurityGroupIngress ToPort NOT_IN %restricted_inbound_ports% << You are using a RESTRICTED PORT!!!!
